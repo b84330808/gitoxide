@@ -32,7 +32,8 @@
     doc = ::document_features::document_features!()
 )]
 #![cfg_attr(all(doc, feature = "document-features"), feature(doc_cfg))]
-#![deny(missing_docs, unsafe_code)]
+#![deny(missing_docs)]
+#![forbid(unsafe_code)]
 
 /// The re-exported `bstr` crate.
 ///

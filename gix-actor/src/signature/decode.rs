@@ -16,9 +16,7 @@ pub(crate) mod function {
         let time_len = i.iter().position(|b| !is_time_byte(*b)).unwrap_or(i.len());
         let (time, rest) = i.split_at(time_len);
         *i = rest;
-        // SAFETY: The parser validated that there are only ASCII characters with `is_time_byte()`.
-        #[expect(unsafe_code)]
-        let time = unsafe { std::str::from_utf8_unchecked(time) };
+        let time = std::str::from_utf8(time).expect("`is_time_byte()` only admits ASCII, which is valid UTF-8");
 
         Ok(SignatureRef {
             name: identity.name,
@@ -153,6 +151,11 @@ mod tests {
             assert_eq!(
                 decode(b"hello <> abc -1215").expect("parse to work").1,
                 signature("hello", "", "")
+            );
+            assert_eq!(
+                decode(b"hello <> 12345\xff-1215").expect("parse to work"),
+                (&b"\xff-1215"[..], signature("hello", "", "12345")),
+                "bytes that aren't ASCII end the time and remain unconsumed"
             );
         }
     }
